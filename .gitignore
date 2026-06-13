@@ -1,0 +1,24 @@
+# Python bytecode / caches
+__pycache__/
+*.py[cod]
+*.opt-*.pyc
+
+# Logs
+log/
+*.log
+
+# Model weights (large binaries — not stored in git)
+# onnx/ models auto-download from HuggingFace (InfiniFlow/deepdoc) on first run.
+# vietocr/weight/ models must be obtained separately (see CLAUDE.md / README).
+*.onnx
+*.pth
+*.pt
+onnx/*.model
+
+# Output directories produced by the CLIs
+ocr_outputs/
+layouts_outputs/
+table_markdown_outputs/
+
+# Keep onnx dictionary/metadata that are small and may be needed
+!onnx/ocr.res
