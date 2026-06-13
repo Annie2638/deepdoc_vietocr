@@ -35,7 +35,7 @@ Bên DeepDoc họ không ghi rõ là sử dụng version bao nhiêu vì sau khi 
 - Text Recognition (Nhận dạng văn bản): Kiến trúc 2 nhánh với PP-HGNetV2, huấn luyện bằng GTC-NRTR (attention) để hướng dẫn SVTR-HGNet (CTC, nhẹ, nhanh). Dữ liệu huấn luyện được tăng cường từ tài liệu, PDF, e-book, và sinh mẫu chữ viết tay.
 
 <div align="center" style="margin-top:20px;margin-bottom:20px;">
-    <img src="img\x6.png" width="900"/>
+    <img src="img/x6.png" width="900"/>
 </div>
 
 Chi tiết về PP-OCRv5, bạn có thể tham khảo tài liệu chính thức tại [đây](https://arxiv.org/html/2507.05595v1).
@@ -54,7 +54,7 @@ Kiến trúc cơ bản gồm 3 phần chính:
 - Head: sử dụng Anchor-Free decoupled head (tách nhánh classification và regression), tăng độ chính xác và dễ huấn luyện.
 
 <div align="center" style="margin-top:20px;margin-bottom:20px;">
-    <img src="img\af645ed9-7301-4ec4-81e7-cb996ddf2d7f.webp" width="900"/>
+    <img src="img/af645ed9-7301-4ec4-81e7-cb996ddf2d7f.webp" width="900"/>
 </div>
 
 
@@ -88,8 +88,17 @@ Trong DeepDoc, YOLOv10 được huấn luyện để nhận dạng các loại n
 
 Đầu tiên bạn clone git về máy:
 ```bash
-git clone https://github.com/hoaivannguyen/deepdoc_vietocr.git
+git clone https://github.com/Annie2638/deepdoc_vietocr.git
+cd deepdoc_vietocr
 ```
+Tạo môi trường ảo và cài đặt các thư viện cần thiết (khuyến nghị **Python 3.10–3.11** để `vietocr` cài đặt trơn tru):
+```bash
+python -m venv .venv
+# Windows:  .venv\Scripts\activate    |    Linux/macOS:  source .venv/bin/activate
+pip install -r requirements.txt
+```
+> Nếu muốn chạy trên GPU, cài thêm bản PyTorch CUDA tương ứng (xem [phần 4](#4)).
+
 Một số cài đặt trước khi chạy chương trình:
 ```bash
 python t_ocr.py -h
@@ -121,7 +130,7 @@ python t_ocr.py --inputs=path_to_images_or_pdfs --output_dir=path_to_store_resul
 ```
 Đầu vào có thể là thư mục chứa hình ảnh hoặc PDF, hoặc một hình ảnh hoặc PDF. Đầu ra sẽ gồm 1 ảnh với các bounding box được nhận diện và 1 file txt chứa văn bản được OCR.
 <div align="center" style="margin-top:20px;margin-bottom:20px;">
-<img src="img\Screenshot 2025-08-28 171633.png" width="900"/>
+<img src="img/Screenshot 2025-08-28 171633.png" width="900"/>
 </div>
 
 Mình đang để mặc định là VietOCR Seq2seq vì hiện đang chạy tương đối nhanh và chính xác. Bạn có thể đổi sang VietOCR Transformer trong module/ocr.py nhưng mình không đề xuất vì thời gian xử lý lâu hơn rất nhiều mà độ chuẩn xác không tănng lên là mấy. Nếu bạn muốn nhanh nhất có thể chuyển sang sử dụng bản ONNX bằng việc import ocr_onnx thay vì ocr nhưng độ chính xác sẽ giảm đi 1 chút.
@@ -133,7 +142,7 @@ python t_recognizer.py --inputs=path_to_images_or_pdfs --threshold=0.2 --mode=la
 ```
 Đầu vào có thể là thư mục chứa hình ảnh hoặc PDF, hoặc một hình ảnh hoặc PDF. Đầu ra sẽ gồm 1 ảnh với các gán nhãn như dưới đây:
 <div align="center" style="margin-top:20px;margin-bottom:20px;">
-<img src="img\49806-Article Text-153529-1-10-20200804_page-0002.jpg" width="1000"/>
+<img src="img/49806-Article Text-153529-1-10-20200804_page-0002.jpg" width="1000"/>
 </div>
 
 ## 3.3 Table Structure Recognizer
@@ -144,7 +153,7 @@ python t_recognizer.py --inputs=path_to_images_or_pdfs --threshold=0.2 --mode=ts
 
 Đầu vào có thể là thư mục chứa hình ảnh hoặc PDF, hoặc một hình ảnh hoặc PDF. Đầu ra sẽ là 1 ảnh với gán nhãn và 1 file markdown với nội dung bảng
 <div align="center" style="margin-top:20px;margin-bottom:20px;">
-<img src="img\Screenshot 2025-08-28 182132.png" width="1000"/>
+<img src="img/Screenshot 2025-08-28 182132.png" width="1000"/>
 </div>
 
 <a name="4"></a>

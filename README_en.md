@@ -35,7 +35,7 @@ DeepDoc does not specify which version it uses, since after conversion to ONNX i
 - Text Recognition: Two-branch architecture with PP-HGNetV2, trained with GTC-NRTR (attention-based) to guide SVTR-HGNet (CTC, lightweight, fast). Training data is augmented with documents, PDFs, e-books, and synthetic handwriting samples.
 
 <div align="center" style="margin-top:20px;margin-bottom:20px;">
-    <img src="img\x6.png" width="900"/>
+    <img src="img/x6.png" width="900"/>
 </div>
 
 For more details about PP-OCRv5, you can refer to the official documentation [here](https://arxiv.org/html/2507.05595v1).
@@ -51,7 +51,7 @@ The basic architecture consists of three main components:
 - Head: Uses an anchor-free decoupled head (separating classification and regression branches), which improves accuracy and makes training easier.
 
 <div align="center" style="margin-top:20px;margin-bottom:20px;">
-    <img src="img\af645ed9-7301-4ec4-81e7-cb996ddf2d7f.webp" width="900"/>
+    <img src="img/af645ed9-7301-4ec4-81e7-cb996ddf2d7f.webp" width="900"/>
 </div>
 
 
@@ -84,8 +84,17 @@ To understand more about YOLOv10, you can refer to the official documentation [h
 
 First, clone the git repository:
 ```bash
-git clone https://github.com/hoaivannguyen/deepdoc_vietocr.git
+git clone https://github.com/Annie2638/deepdoc_vietocr.git
+cd deepdoc_vietocr
 ```
+Create a virtual environment and install the dependencies (**Python 3.10–3.11** recommended so `vietocr` installs cleanly):
+```bash
+python -m venv .venv
+# Windows:  .venv\Scripts\activate    |    Linux/macOS:  source .venv/bin/activate
+pip install -r requirements.txt
+```
+> To run on GPU, also install the matching CUDA build of PyTorch (see [section 4](#4)).
+
 Some setup options before running the program:
 ```bash
 python t_ocr.py -h
@@ -117,7 +126,7 @@ python t_ocr.py --inputs=path_to_images_or_pdfs --output_dir=path_to_store_resul
 ```
 The input can be a directory containing images or PDFs, or a single image or PDF file. The output will include 1 image with the detected bounding boxes and 1 text file containing the OCR text.
 <div align="center" style="margin-top:20px;margin-bottom:20px;">
-<img src="img\Screenshot 2025-08-28 171633.png" width="900"/>
+<img src="img/Screenshot 2025-08-28 171633.png" width="900"/>
 </div>
 
 I'm currently using VietOCR Seq2seq as the default since it runs relatively fast and accurately. You can switch to VietOCR Transformer in module/ocr.py, but I don't recommend it because the processing time is much longer while the accuracy doesn't improve significantly. If you want maximum speed, you can switch to the ONNX version by importing ocr_onnx instead of ocr, though the accuracy will decrease slightly.
@@ -129,7 +138,7 @@ python t_recognizer.py --inputs=path_to_images_or_pdfs --threshold=0.2 --mode=la
 ```
 The input can be a directory containing images or PDFs, or a single image or PDF file. The output will include 1 image with the detected labels as shown below:
 <div align="center" style="margin-top:20px;margin-bottom:20px;">
-<img src="img\49806-Article Text-153529-1-10-20200804_page-0002.jpg" width="1000"/>
+<img src="img/49806-Article Text-153529-1-10-20200804_page-0002.jpg" width="1000"/>
 </div>
 
 ### 3.3. Table Structure Recognizer
@@ -140,7 +149,7 @@ python t_recognizer.py --inputs=path_to_images_or_pdfs --threshold=0.2 --mode=ts
 
 The input can be a directory containing images or PDFs, or a single image or PDF file. The output will include 1 image with the detected labels and 1 markdown file with the table content.
 <div align="center" style="margin-top:20px;margin-bottom:20px;">
-<img src="img\Screenshot 2025-08-28 182132.png" width="1000"/>
+<img src="img/Screenshot 2025-08-28 182132.png" width="1000"/>
 </div>
 
 <a name="4"></a>

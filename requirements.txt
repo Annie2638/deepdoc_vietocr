@@ -11,3 +11,7 @@ pyclipper
 ruamel.yaml
 cachetools
 six
+trio
+pycryptodomex
+strenum
+vietocr
