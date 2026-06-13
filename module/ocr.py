@@ -91,6 +91,9 @@ def load_model(model_dir, nm, device_id: int | None = None):
     def cuda_is_available():
         try:
             import torch
+            # only use the ONNX CUDA provider if onnxruntime actually has it
+            if "CUDAExecutionProvider" not in ort.get_available_providers():
+                return False
             if torch.cuda.is_available() and torch.cuda.device_count() > device_id:
                 return True
         except Exception:
@@ -143,17 +146,26 @@ class TextRecognizer:
         #config['weights'] = r"vietocr\weight\vgg_transformer.pth" 
 
         config['cnn']['pretrained'] = True
-        config['device'] = 'cpu'
+        config['device'] = os.environ.get('VIETOCR_DEVICE', 'cpu')
         self.detector = Predictor(config)
 
     def __call__(self, img_list):
-        results = []
-        for img in img_list:
-            # Ensure PIL Image
-            if isinstance(img, np.ndarray):
-                img = Image.fromarray(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
-            text = self.detector.predict(img)
-            results.append((text, 1.0))
+        if not img_list:
+            return [], 0.0
+        # Ensure PIL Images
+        pil_imgs = [
+            Image.fromarray(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
+            if isinstance(img, np.ndarray) else img
+            for img in img_list
+        ]
+        # Batched recognition (default): predict_batch buckets crops by width and
+        # decodes each bucket in a single parallel translate() call. Set
+        # VIETOCR_BATCH=0 to fall back to the original one-line-at-a-time path.
+        if os.environ.get('VIETOCR_BATCH', '1') == '0':
+            texts = [self.detector.predict(img) for img in pil_imgs]
+        else:
+            texts = self.detector.predict_batch(pil_imgs)
+        results = [(t, 1.0) for t in texts]
         return results, 0.0
 
 

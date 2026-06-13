@@ -35,7 +35,7 @@ import trio
 
 # os.environ['CUDA_VISIBLE_DEVICES'] = '0,2' #2 gpus, uncontinuous
 # os.environ['CUDA_VISIBLE_DEVICES'] = '0' #1 gpu
-os.environ['CUDA_VISIBLE_DEVICES'] = '' #cpu
+os.environ['CUDA_VISIBLE_DEVICES'] = os.environ.get('CUDA_VISIBLE_DEVICES', '') #cpu by default; set env to use GPU
 
 import time
 import torch

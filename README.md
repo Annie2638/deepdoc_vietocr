@@ -8,6 +8,7 @@
 - [1. Giới thiệu](#1)
 - [2. Kiến trúc kỹ thuật](#2)
 - [3. Cài đặt và chạy thử](#3)
+- [4. Tối ưu hiệu năng & Benchmark](#4)
 
 <a name="1"></a>
 
@@ -145,6 +146,50 @@ python t_recognizer.py --inputs=path_to_images_or_pdfs --threshold=0.2 --mode=ts
 <div align="center" style="margin-top:20px;margin-bottom:20px;">
 <img src="img\Screenshot 2025-08-28 182132.png" width="1000"/>
 </div>
+
+<a name="4"></a>
+
+## 4. Tối ưu hiệu năng & Benchmark
+
+### 4.1 Nhận dạng theo lô (batched recognition)
+Code gốc nhận dạng **từng dòng văn bản một** (gọi `predict` trong vòng lặp). Phần `TextRecognizer.__call__` trong `module/ocr.py` đã được sửa để dùng `predict_batch` của VietOCR — gom các dòng theo chiều rộng và giải mã cả lô trong **một lần gọi `translate()`**. Văn bản đầu ra **giữ nguyên** (không đổi độ chính xác) nhưng nhanh hơn đáng kể.
+
+Hai biến môi trường điều khiển recognizer:
+- `VIETOCR_DEVICE`: `cpu` (mặc định) hoặc `cuda:0` để chạy VietOCR trên GPU.
+- `VIETOCR_BATCH`: `1` (mặc định, theo lô) hoặc `0` (từng dòng như bản gốc).
+
+Chạy trên GPU (cần cài PyTorch bản CUDA):
+```bash
+# Linux/macOS
+CUDA_VISIBLE_DEVICES=0 VIETOCR_DEVICE=cuda:0 python t_ocr.py --inputs=... --output_dir=...
+```
+```powershell
+# Windows PowerShell
+$env:CUDA_VISIBLE_DEVICES="0"; $env:VIETOCR_DEVICE="cuda:0"; python t_ocr.py --inputs=... --output_dir=...
+```
+> Phần Text Detection (ONNX) vẫn chạy CPU trừ khi cài `onnxruntime-gpu` + cuDNN, nhưng phần này chiếm thời gian không đáng kể nên không bắt buộc.
+
+### 4.2 Kết quả benchmark
+Đo trên **10 trang sách tiếng Việt** (ảnh chụp), tổng thời gian wall-clock bao gồm load model 1 lần. Cấu hình: CPU **AMD Ryzen 7 4800H**, GPU **NVIDIA GTX 1650 4GB**.
+
+| Cấu hình | Tổng (10 trang) | Trung bình mỗi trang | So với gốc |
+|---|---|---|---|
+| CPU, từng dòng (gốc) | 145.8 s | 14.58 s | 1.0× |
+| CPU, theo lô | 68.5 s | 6.85 s | 2.1× |
+| GPU, từng dòng | 86.0 s | 8.60 s | 1.7× |
+| **GPU, theo lô** | **25.9 s** | **2.59 s** | **5.6×** |
+
+Nhận xét:
+- Nhận dạng theo lô nhanh hơn **~2×** ngay cả khi chỉ chạy CPU.
+- Kết hợp GPU + theo lô nhanh hơn **~5.6×** so với bản gốc, mà văn bản đầu ra không đổi.
+- Nút thắt cổ chai là khâu recognition; tăng tốc đến từ việc gom lô (batching) chứ không chỉ từ GPU.
+
+### 4.3 Tự chạy lại benchmark
+Ảnh mẫu nằm trong `benchmark/images`. Chạy:
+```bash
+python benchmark/run_benchmark.py            # đủ 4 cấu hình (bỏ qua GPU nếu không có CUDA)
+python benchmark/run_benchmark.py --device cpu
+```
 
 ## Kết
 Hy vọng các bạn thấy công cụ hữu ích và áp dụng được vào thực tế. Nếu có góp ý hãy để lại dưới phần bình luận. Cảm ơn các bạn đã đọc bài viết! 

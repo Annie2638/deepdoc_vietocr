@@ -20,5 +20,8 @@ ocr_outputs/
 layouts_outputs/
 table_markdown_outputs/
 
+# Transient benchmark run outputs (the input images in benchmark/images are kept)
+benchmark/out_*/
+
 # Keep onnx dictionary/metadata that are small and may be needed
 !onnx/ocr.res

@@ -8,6 +8,7 @@
 - [1. Introduction](#1)
 - [2. Architecture](#2)
 - [3. Installation & Running](#3)
+- [4. Performance & Benchmark](#4)
 
 <a name="1"></a>
 
@@ -141,6 +142,50 @@ The input can be a directory containing images or PDFs, or a single image or PDF
 <div align="center" style="margin-top:20px;margin-bottom:20px;">
 <img src="img\Screenshot 2025-08-28 182132.png" width="1000"/>
 </div>
+
+<a name="4"></a>
+
+## 4. Performance & Benchmark
+
+### 4.1 Batched recognition
+The original code recognized text lines **one at a time** (calling `predict` in a loop). `TextRecognizer.__call__` in `module/ocr.py` was changed to use VietOCR's `predict_batch` — it buckets line crops by width and decodes each bucket in a **single parallel `translate()` call**. Output text is **unchanged** (same accuracy) but it is significantly faster.
+
+Two environment variables control the recognizer:
+- `VIETOCR_DEVICE`: `cpu` (default) or `cuda:0` to run VietOCR on GPU.
+- `VIETOCR_BATCH`: `1` (default, batched) or `0` (one line at a time, original behavior).
+
+Run on GPU (requires a CUDA build of PyTorch):
+```bash
+# Linux/macOS
+CUDA_VISIBLE_DEVICES=0 VIETOCR_DEVICE=cuda:0 python t_ocr.py --inputs=... --output_dir=...
+```
+```powershell
+# Windows PowerShell
+$env:CUDA_VISIBLE_DEVICES="0"; $env:VIETOCR_DEVICE="cuda:0"; python t_ocr.py --inputs=... --output_dir=...
+```
+> Text Detection (ONNX) still runs on CPU unless `onnxruntime-gpu` + cuDNN are installed, but it is a negligible fraction of the time.
+
+### 4.2 Benchmark results
+Measured on **10 Vietnamese book pages** (photos), total wall-clock including one-time model load. Hardware: CPU **AMD Ryzen 7 4800H**, GPU **NVIDIA GTX 1650 4GB**.
+
+| Config | Total (10 pages) | Avg per page | vs original |
+|---|---|---|---|
+| CPU, per-line (original) | 145.8 s | 14.58 s | 1.0× |
+| CPU, batched | 68.5 s | 6.85 s | 2.1× |
+| GPU, per-line | 86.0 s | 8.60 s | 1.7× |
+| **GPU, batched** | **25.9 s** | **2.59 s** | **5.6×** |
+
+Notes:
+- Batching alone gives ~2× even on CPU-only.
+- GPU + batching is ~5.6× faster than the original, with identical output text.
+- The bottleneck is recognition; the speedup comes from batching, not just the GPU.
+
+### 4.3 Reproduce
+Sample images live in `benchmark/images`. Run:
+```bash
+python benchmark/run_benchmark.py            # all 4 configs (GPU skipped if no CUDA)
+python benchmark/run_benchmark.py --device cpu
+```
 
 ## Conclusion
 I hope you find this tool useful and applicable in practice. If you have any feedback, please leave it in the comments below. Thank you for reading!
